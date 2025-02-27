@@ -5,6 +5,8 @@ logs*
 imgs*
 saved_videos*
 saved_models*
+save_models*
 log_imgs*
 *.log
 *.txt
+train.log
