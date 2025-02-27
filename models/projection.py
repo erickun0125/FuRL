@@ -8,6 +8,7 @@ from flax import linen as nn
 from flax.training import train_state
 from models import MLP
 
+import os
 
 class Projection(nn.Module):
     def setup(self):
@@ -168,12 +169,15 @@ class RewardModel:
         return log_info
 
     def save(self, cnt):
-        self.checkpointer.save(f"{self.ckpt_dir}/{cnt}",
-                               {"proj": self.proj_state.params},
-                               force=True)
+        abs_ckpt_dir = os.path.abspath(self.ckpt_dir)
+        save_path = f"{abs_ckpt_dir}/reward_model/{cnt}"
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        self.checkpointer.save(save_path, {"proj": self.proj_state.params}, force=True)
 
     def load(self, ckpt_dir: str, cnt: int = 0):
-        raw_restored = self.checkpointer.restore(f"{ckpt_dir}/{cnt}")
+        abs_ckpt_dir = os.path.abspath(ckpt_dir)
+        load_path = f"{abs_ckpt_dir}/reward_model/{cnt}"
+        raw_restored = self.checkpointer.restore(load_path)
         proj_params = raw_restored["proj"]
         self.proj_state = train_state.TrainState.create(
             apply_fn=self.proj.apply,

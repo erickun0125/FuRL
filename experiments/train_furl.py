@@ -121,6 +121,7 @@ def setup_exp(config):
                           margin=config.cosine_margin,
                           gamma=config.gamma,
                           lr=config.lr,
+                            ckpt_dir=config.ckpt_dir,
                           text_embedding=text_embedding,
                           goal_embedding=goal_embedding,
                           hidden_dims=config.hidden_dims)
@@ -133,10 +134,12 @@ def setup_exp(config):
                          tau=config.tau,
                          gamma=config.gamma,
                          lr=config.lr,
+                            ckpt_dir=config.ckpt_dir,
                          hidden_dims=config.hidden_dims)
 
     # Initialize the reward model
     reward_model = RewardModel(seed=config.seed,
+                                 ckpt_dir=config.ckpt_dir,
                                text_embedding=text_embedding,
                                goal_embedding=goal_embedding)
 
@@ -166,7 +169,10 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
 
     # logging setup
     exp_name, logger = setup_logging(config)
- 
+    
+    # save frequency 설정 (예: 10,000 step마다 저장)
+    save_freq = 50000
+    
     # experiment setup
     (transform,
      liv,
@@ -422,6 +428,16 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
                     f"task_reward: {lst_ep_task_reward:.2f}, "
                     f"vlm_reward: {lst_ep_vlm_reward:.2f}\n"
                 )
+
+
+
+        # 일정 주기마다 모델 저장
+        if t % save_freq == 0:
+            vlm_agent.save(cnt=t)
+            sac_agent.save(cnt=t)
+            reward_model.save(cnt=t)
+            logger.info(f"Checkpoint saved at step {t}")
+
 
 
     # save logs

@@ -1,5 +1,5 @@
 import ml_collections
-
+import os
 
 def get_config():
     config = ml_collections.ConfigDict()
@@ -34,5 +34,8 @@ def get_config():
     config.l2_margin = 0.25
     config.cosine_margin = 0.25
     config.embed_buffer_size = 20000
+
+    # save model
+    config.ckpt_dir = os.path.abspath(f"save_models/{config.env_name}")
 
     return config
