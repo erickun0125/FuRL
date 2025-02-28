@@ -9,7 +9,7 @@ import ml_collections
 import gymnasium as gym
 import torchvision.transforms as T
 
-from models import SACAgent, FuRLAgent, RewardModel
+from models import SACAgent, VLMAgent, RewardModel
 from utils import TASKS, get_logger, make_env, load_liv
 
 # 🔹 테스트 환경 설정
@@ -35,7 +35,7 @@ def load_static_components(config):
 
 # 🔹 100000부터 latest_ckpt까지 100000 단위 체크포인트 리스트 생성 함수
 def get_checkpoint_list(config, start_ckpt=100000):
-    vlm_ckpt_dir = os.path.join(config.ckpt_dir, "furl_agent")
+    vlm_ckpt_dir = os.path.join(config.ckpt_dir, "sac_agent")
     ckpt_candidates = [int(d) for d in os.listdir(vlm_ckpt_dir) if d.isdigit()]
     if not ckpt_candidates:
         raise ValueError(f"No valid checkpoint found in {vlm_ckpt_dir}")
@@ -46,13 +46,13 @@ def get_checkpoint_list(config, start_ckpt=100000):
 
 # 🔹 주어진 체크포인트 번호로 모델 로드 함수
 def load_models_at_checkpoint(config, env, text_embedding, ckpt):
-    vlm_agent = FuRLAgent(obs_dim=env.observation_space.shape[0],
+    vlm_agent = VLMAgent(obs_dim=env.observation_space.shape[0],
                           act_dim=env.action_space.shape[0],
                           max_action=env.action_space.high[0],
                           seed=config.seed,
                           ckpt_dir=config.ckpt_dir,
                           text_embedding=text_embedding,
-                          goal_embedding=None)
+                          )
     
     sac_agent = SACAgent(obs_dim=env.observation_space.shape[0],
                          act_dim=env.action_space.shape[0],
@@ -99,7 +99,7 @@ def test_model():
         while not done:
             step_count += 1
             # VLM Agent에서 행동 샘플링
-            action = vlm_agent.sample_action(obs, eval_mode=True)
+            action = sac_agent.sample_action(obs, eval_mode=True)
             next_obs, env_reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             episode_reward += env_reward
@@ -134,7 +134,7 @@ def test_model():
         print(f"Checkpoint {ckpt} -> Total Reward: {overall_rewards[ckpt]:.2f}, Success: {overall_successes[ckpt]}")
     
     # 전체 영상 저장 (모든 에피소드의 프레임을 하나의 영상으로 저장)
-    video_path = os.path.join(config.ckpt_dir, "test_results.mp4")
+    video_path = os.path.join(config.ckpt_dir, "test_results_sac.mp4")
     imageio.mimsave(video_path, video_frames, fps=30)
     print(f"\n🎥 Evaluation video saved at: {video_path}")
 

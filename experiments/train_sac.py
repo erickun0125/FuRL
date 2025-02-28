@@ -82,6 +82,7 @@ def setup_exp(config):
                      tau=config.tau,
                      gamma=config.gamma,
                      lr=config.lr,
+                     ckpt_dir=config.ckpt_dir,
                      hidden_dims=config.hidden_dims)
 
     # Replay buffer
@@ -98,6 +99,9 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
 
     # logging
     exp_name, logger = setup_logging(config)
+
+    # save frequency 설정 (예: 10,000 step마다 저장)
+    save_freq = 100000
 
     # experiment setup
     (env,
@@ -203,6 +207,11 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
                     f"task_reward: {lst_ep_task_reward:.2f}, "
                     f"ep_reward: {lst_ep_reward:.2f}\n"
                 )
+
+        # 일정 주기마다 모델 저장
+        if t % save_freq == 0:
+            agent.save(cnt=t)
+            logger.info(f"Checkpoint saved at step {t}")
 
     # save logs
     log_df = pd.DataFrame(logs)
