@@ -137,3 +137,42 @@ def make_env(env_name: str = "drawer-open-v2-goal-hidden",
     env.action_space.seed(seed=seed)
 
     return env
+
+
+
+def make_vector_env(env_name: str,
+                    seed: int,
+                    n_envs: int,
+                    camera_id: int = 1,
+                    render_image_size: int = 256,
+                    image_size: int = 256,
+                    use_pixel: bool = False,
+                    action_repeat: int = 1,
+                    render_mode: str = "rgb_array",
+                    asynchronous: bool = True):
+    """
+    n_envs 개의 환경을 병렬로 실행할 수 있도록 벡터라이즈 환경을 생성하는 함수입니다.
+    asynchronous=True일 경우 AsyncVectorEnv, 그렇지 않으면 SyncVectorEnv를 사용합니다.
+    """
+    def _init_env(rank):
+        def init():
+            # 각 환경은 seed에 rank를 더해 다르게 초기화 (다양성을 위해)
+            env = make_env(env_name=env_name,
+                           seed=seed + rank,
+                           camera_id=camera_id,
+                           render_image_size=render_image_size,
+                           image_size=image_size,
+                           use_pixel=use_pixel,
+                           action_repeat=action_repeat,
+                           render_mode=render_mode)
+            return env
+        return init
+
+    env_fns = [_init_env(i) for i in range(n_envs)]
+    
+    if asynchronous:
+        vector_env = gym.vector.AsyncVectorEnv(env_fns)
+    else:
+        vector_env = gym.vector.SyncVectorEnv(env_fns)
+    
+    return vector_env

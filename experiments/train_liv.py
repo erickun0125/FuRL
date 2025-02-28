@@ -126,7 +126,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
     exp_name, logger = setup_logging(config)
 
     # save frequency 설정 (예: 10,000 step마다 저장)
-    save_freq = 50
+    save_freq = 100000
 
     # experiment setup
     (transform,
@@ -207,7 +207,7 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
         # eval
         if t % config.eval_freq == 0:
             eval_reward, eval_success, _, _ = eval_policy(
-                agent, eval_env, eval_episodes=eval_episodes)
+                vlm_agent, eval_env, eval_episodes=eval_episodes)
 
         # logging
         if t % config.log_freq == 0:
