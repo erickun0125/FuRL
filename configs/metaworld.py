@@ -4,7 +4,7 @@ import os
 def get_config():
     config = ml_collections.ConfigDict()
 
-    config.env_name = "peg-insert-side-v2-goal-observable"
+    config.env_name = "door-open-v2-goal-hidden"
     config.camera_id = 2
     config.residual = False
     config.eval_episodes = 100

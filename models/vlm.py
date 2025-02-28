@@ -255,18 +255,24 @@ class VLMAgent:
         return log_info
 
     def save(self, cnt: int = 0):
-        self.checkpointer.save(f"{self.ckpt_dir}/{cnt}",
-                               {"proj": self.proj_state.params},
-                               force=True)
+        params = {"actor": self.actor_state.params,
+                  "critic": self.critic_state.params}
+        abs_ckpt_dir = os.path.abspath(self.ckpt_dir)
+        save_path = f"{abs_ckpt_dir}/liv_agent/{cnt}"
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        self.checkpointer.save(save_path, params, force=True)
 
     def load(self, ckpt_dir: str, cnt: int = 0):
-        raw_restored = self.checkpointer.restore(f"{ckpt_dir}/{cnt}")
+        abs_ckpt_dir = os.path.abspath(ckpt_dir)
+        load_path = f"{abs_ckpt_dir}/liv_agent/{cnt}"
+        raw_restored = self.checkpointer.restore(load_path)
         actor_params = raw_restored["actor"]
         critic_params = raw_restored["critic"]
+
         self.actor_state = train_state.TrainState.create(
             apply_fn=self.actor.apply,
             params=actor_params,
-            tx=optax.adam(self.lr)) 
+            tx=optax.adam(self.lr))
         self.critic_state = train_state.TrainState.create(
             apply_fn=self.critic.apply,
             params=critic_params,

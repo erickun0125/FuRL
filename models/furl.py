@@ -263,13 +263,13 @@ class FuRLAgent:
                   "critic": self.critic_state.params}
         # 절대 경로 변환 및 저장 폴더 생성
         abs_ckpt_dir = os.path.abspath(self.ckpt_dir)
-        save_path = f"{abs_ckpt_dir}/vlm_agent/{cnt}"
+        save_path = f"{abs_ckpt_dir}/furl_agent/{cnt}"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         self.checkpointer.save(save_path, params, force=True)
 
     def load(self, ckpt_dir: str, cnt: int = 0):
         abs_ckpt_dir = os.path.abspath(ckpt_dir)
-        load_path = f"{abs_ckpt_dir}/vlm_agent/{cnt}"
+        load_path = f"{abs_ckpt_dir}/furl_agent/{cnt}"
         raw_restored = self.checkpointer.restore(load_path)
         actor_params = raw_restored["actor"]
         critic_params = raw_restored["critic"]

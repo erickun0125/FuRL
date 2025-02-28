@@ -125,6 +125,9 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
     # logging setup
     exp_name, logger = setup_logging(config)
 
+    # save frequency 설정 (예: 10,000 step마다 저장)
+    save_freq = 50
+
     # experiment setup
     (transform,
      liv,
@@ -249,6 +252,11 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
                     f"task_reward: {lst_ep_task_reward:.2f}, "
                     f"vlm_reward: {lst_ep_vlm_reward:.2f}\n"
                 )
+
+        # 일정 주기마다 모델 저장
+        if t % save_freq == 0:
+            vlm_agent.save(cnt=t)
+            logger.info(f"Checkpoint saved at step {t}")
 
     # save logs
     log_df = pd.DataFrame(logs)
