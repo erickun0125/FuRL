@@ -107,6 +107,7 @@ def setup_exp(config):
                          rho=config.rho,
                          gamma=config.gamma,
                          lr=config.lr,
+                         ckpt_dir=config.ckpt_dir,
                          text_embedding=text_embedding,
                          hidden_dims=config.hidden_dims)
 
